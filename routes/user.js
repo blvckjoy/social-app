@@ -118,10 +118,13 @@ router.post("/:id/follow", verifyToken, async (req, res) => {
       if (!currentUser)
          return res.status(404).json({ message: "Current user not found." });
 
-      if (!currentUser.following.includes(userToFollow._id)) {
-         currentUser.following.push(userToFollow._id);
-         userToFollow.followers.push(currentUser._id);
-      }
+      if (currentUser.following.includes(userToFollow._id))
+         return res
+            .status(400)
+            .json({ message: "You are already following this user." });
+
+      currentUser.following.push(userToFollow._id);
+      userToFollow.followers.push(currentUser._id);
 
       await currentUser.save();
       await userToFollow.save();
