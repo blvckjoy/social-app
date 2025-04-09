@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrpyt = require("bcrypt");
 const { validateInput } = require("../middleware/validate");
+const jwt = require("jsonwebtoken");
+const verifyToken = require("../middleware/auth");
 
 // Get all users
 router.get("/", async (req, res) => {
@@ -15,9 +17,9 @@ router.get("/", async (req, res) => {
 });
 
 // Get a user profile
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
    try {
-      const user = await User.findById(req.params.id);
+      const user = await User.findById(req.user.id).select("-password");
       if (!user) return res.status(404).json({ message: "User not found" });
 
       res.json(user);
@@ -50,6 +52,8 @@ router.post("/register", async (req, res) => {
          avatar: avatar || "",
       });
       const savedUser = await newUser.save();
+
+      // Exclude password
       const { password: _, ...userWithoutPassword } = savedUser.toObject();
 
       res.status(201).json({
@@ -77,9 +81,19 @@ router.post("/login", validateInput, async (req, res) => {
       if (!isPasswordValid)
          return res.status(401).json({ message: "Password is invalid" });
 
+      const token = jwt.sign(
+         {
+            id: validUser._id,
+            username: validUser.username,
+         },
+         process.env.ACCESS_TOKEN_SECRET
+      );
+
+      // Exclude password
       const { password: _, ...userWithoutPassword } = validUser.toObject();
       res.status(200).json({
          message: "Login successful",
+         token,
          user: userWithoutPassword,
       });
    } catch (error) {
