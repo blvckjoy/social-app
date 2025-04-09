@@ -126,8 +126,7 @@ router.post("/:id/follow", verifyToken, async (req, res) => {
       currentUser.following.push(userToFollow._id);
       userToFollow.followers.push(currentUser._id);
 
-      await currentUser.save();
-      await userToFollow.save();
+      await Promise.all([currentUser.save(), userToFollow.save()]);
 
       res.status(200).json({ message: "User followed successfully." });
    } catch (error) {
