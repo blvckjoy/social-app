@@ -105,13 +105,18 @@ router.post("/login", validateInput, async (req, res) => {
 router.post("/:id/follow", verifyToken, async (req, res) => {
    try {
       if (req.params.id === req.user.id)
-         return res.status(400).json({ message: "You cannot follow yourself" });
+         return res
+            .status(400)
+            .json({ message: "You cannot follow yourself." });
 
       const userToFollow = await User.findById(req.params.id);
       const currentUser = await User.findById(req.user.id);
 
-      if (!userToFollow || !currentUser)
+      if (!userToFollow)
          return res.status(404).json({ message: "User not found." });
+
+      if (!currentUser)
+         return res.status(404).json({ message: "Current user not found." });
 
       if (!currentUser.following.includes(userToFollow._id)) {
          currentUser.following.push(userToFollow._id);
