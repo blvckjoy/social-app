@@ -101,4 +101,27 @@ router.post("/login", validateInput, async (req, res) => {
    }
 });
 
+// Follow a user
+router.post("/:id/follow", verifyToken, async (req, res) => {
+   try {
+      const userToFollow = await User.findById(req.params.id);
+      const currentUser = await User.findById(req.user.id);
+
+      if (!userToFollow || !currentUser)
+         return res.status(404).json({ message: "User not found." });
+
+      if (!currentUser.following.includes(userToFollow._id)) {
+         currentUser.following.push(userToFollow._id);
+         userToFollow.followers.push(currentUser._id);
+      }
+
+      await currentUser.save();
+      await userToFollow.save();
+
+      res.status(200).json({ message: "User followed successfully." });
+   } catch (error) {
+      res.status(500).json({ message: error.message });
+   }
+});
+
 module.exports = router;
