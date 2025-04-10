@@ -19,5 +19,5 @@ const postRouter = require("./routes/post");
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
