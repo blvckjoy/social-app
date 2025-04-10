@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 const app = express();
 app.use(express.json());
 
+app.get("/", (req, res) => {
+   res.json({ message: "Welcome to the social media app homepage" });
+});
+
 mongoose
    .connect(process.env.MONGODB_URI)
    .then(() => console.log("Connected to Database"))
